@@ -1,4 +1,5 @@
 import * as t from 'io-ts-codegen';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 import { ComplexModel, ComplexModelProperty, ComplexModelArrayProperty } from '../models';
 import { toReference } from '../utilities/refs';
@@ -7,10 +8,10 @@ import { fromPrimitive } from './primitive';
 
 const toArrayPropertyCombinator = (p: ComplexModelArrayProperty): t.TypeReference => {
   if ('$ref' in p.items) {
-    return t.arrayCombinator(t.identifier(prefixFhir(toReference(p.items.$ref))));
+    return pipe(p.items.$ref, toReference, prefixFhir, t.identifier, t.arrayCombinator);
   }
 
-  return t.arrayCombinator(t.keyofCombinator(p.items.enum.map((e) => (typeof e === 'number' ? `"${e}"` : e))));
+  return pipe(p.items.enum, t.keyofCombinator, t.arrayCombinator);
 };
 
 const toComplexPropertyType = (p: ComplexModelProperty): t.TypeReference => {
@@ -20,7 +21,7 @@ const toComplexPropertyType = (p: ComplexModelProperty): t.TypeReference => {
     case 'const':
       return t.literalCombinator(p.const);
     case 'enum':
-      return t.keyofCombinator(p.enum.map((e) => (typeof e === 'number' ? `"${e}"` : e)));
+      return t.keyofCombinator(p.enum);
     case 'primitive':
       return fromPrimitive(p);
     case 'ref':
