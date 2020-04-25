@@ -12,7 +12,7 @@
     "build": "yarn generate && tsc",
     "external": "ts-node src/scripts/getExternal.ts",
     "cli": "node -r ts-node/register ./src/index.ts -i .external/fhir.schema.json -o output",
-    "generate": "yarn external && ts-node src/generator.ts",
+    "generate": "yarn external && ts-node src/generate.ts",
     "test": "jest"
   },
   "dependencies": {

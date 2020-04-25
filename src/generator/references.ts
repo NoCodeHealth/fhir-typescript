@@ -9,12 +9,12 @@ import {
   FhirComplexModel,
   FhirArrayItemModel,
   FhirArrayModel,
+  FhirPrimitiveModel,
   FhirPropertyModel,
   FhirRefModel,
   FhirRefArrayItemModel,
-} from './complex';
-import { FhirPrimitiveModel } from './primitive';
-import { FhirResourceListModel } from './resourceList';
+  FhirResourceListModel,
+} from '../models';
 
 const lensToComplexRefs = m.Lens.fromProp<FhirComplexModel>()('properties')
   .composeTraversal(m.fromTraversable(A.array)())
@@ -30,7 +30,7 @@ const lensToComplexArrayRefs = m.Lens.fromProp<FhirComplexModel>()('properties')
 
 const lensToResourceListRefs = m.Lens.fromProp<FhirResourceListModel>()('resources').asFold();
 
-const makeReferences = (model: FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel): string[] => {
+export const makeReferences = (model: FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel): string[] => {
   switch (model._tag) {
     case 'complex':
       return [...lensToComplexRefs.getAll(model), ...lensToComplexArrayRefs.getAll(model)];
@@ -40,17 +40,3 @@ const makeReferences = (model: FhirComplexModel | FhirPrimitiveModel | FhirResou
       return [];
   }
 };
-
-export interface Declaration {
-  model: FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel;
-  references: string[];
-}
-
-export const Declaration = (model: FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel): Declaration => ({
-  model,
-  references: makeReferences(model),
-});
-
-export const makeDeclarations: (
-  models: (FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel)[],
-) => Declaration[] = A.map(Declaration);

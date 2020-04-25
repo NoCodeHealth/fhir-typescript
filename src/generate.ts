@@ -1,3 +1,4 @@
+import * as t from 'io-ts-codegen';
 import * as A from 'fp-ts/lib/Array';
 import * as D from 'fp-ts/lib/Date';
 import * as E from 'fp-ts/lib/Either';
@@ -10,9 +11,9 @@ import { drawTree } from 'fp-ts/lib/Tree';
 import { error, info } from './logging';
 import { FhirSchema } from './schema';
 import { jsonParse, readFileSync, resolvePath, writeFileSync } from './utilities/io';
-
-import { makeDeclarationFiles, DeclarationFile } from './combinators';
-import { makeModels } from './models';
+import { makeTypes } from './combinators';
+import { makeFiles, toDeclarations } from './generator';
+import { makeModels, FhirModels } from './models';
 
 const readInput: (input: string) => IOE.IOEither<IO.IO<void>, string> = flow(
   readFileSync,
@@ -31,8 +32,6 @@ const decodeInput: (u: unknown) => IOE.IOEither<IO.IO<void>, FhirSchema> = flow(
   IOE.fromEither,
 );
 
-const generateFiles: (schema: FhirSchema) => DeclarationFile[] = flow(makeModels, makeDeclarationFiles);
-
 const writeOutput: (output: string) => (content: string) => IOE.IOEither<IO.IO<void>, void> = (output) =>
   flow(
     writeFileSync(resolvePath(output)),
@@ -45,7 +44,12 @@ const main = ({ input, output }: { input: string; output: string }) =>
     readInput,
     IOE.chain(parseInput),
     IOE.chain(decodeInput),
-    IOE.map(generateFiles),
+    IOE.map(makeModels),
+    IOE.map((models: FhirModels[]) => ({
+      declarations: toDeclarations(models),
+      types: flow(A.map(makeTypes), t.sort)(models),
+    })),
+    IOE.map(makeFiles),
     IOE.chain((files) =>
       A.array.sequence(IOE.ioEither)(
         A.array.map(files, (file) => writeOutput(`${output}/${file.filename}.ts`)(file.content)),

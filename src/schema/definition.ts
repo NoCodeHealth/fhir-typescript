@@ -1,11 +1,10 @@
 import * as C from 'io-ts/lib/Codec';
 import * as G from 'io-ts/lib/Guard';
 
-import { makeCompat, untaggedUnion, Compat } from '../utilities/codecs';
-import { isFhirComplex, FhirComplex } from './complex';
+import { lazy, makeCompat, untaggedUnion, Compat } from '../utilities/codecs';
+import { isFhirComplex, FhirComplex, FhirProperty } from './complex';
 import { FhirDescriptableGuard } from './descriptable';
 import { isFhirPrimitive, FhirPrimitive } from './primitive';
-import { FhirProperty } from './property';
 import { isFhirResourceList, FhirResourceList } from './resourceList';
 
 /**
@@ -15,41 +14,43 @@ import { isFhirResourceList, FhirResourceList } from './resourceList';
  */
 export type FhirDefinition = FhirComplex | FhirPrimitive | FhirResourceList;
 
-export const FhirDefinition: Compat<FhirDefinition> = untaggedUnion(
-  makeCompat(
-    FhirComplex,
-    G.intersection(
-      FhirDescriptableGuard,
+export const FhirDefinition: Compat<FhirDefinition> = lazy('FhirDefinition', () =>
+  untaggedUnion(
+    makeCompat(
+      FhirComplex,
+      G.intersection(
+        FhirDescriptableGuard,
+        G.type({
+          properties: G.record(FhirProperty),
+          additionalProperties: G.literal(false),
+          required: G.array(G.string),
+        }),
+      ),
+    ),
+    makeCompat(
+      FhirPrimitive,
+      G.intersection(
+        FhirDescriptableGuard,
+        G.intersection(
+          G.type({
+            type: G.literal('boolean', 'number', 'string'),
+          }),
+          G.partial({
+            pattern: G.string,
+          }),
+        ),
+      ),
+    ),
+    makeCompat(
+      FhirResourceList,
       G.type({
-        properties: G.record(FhirProperty),
-        additionalProperties: G.literal(false),
-        required: G.array(G.string),
+        oneOf: G.array(
+          G.type({
+            $ref: G.string,
+          }),
+        ),
       }),
     ),
-  ),
-  makeCompat(
-    FhirPrimitive,
-    G.intersection(
-      FhirDescriptableGuard,
-      G.intersection(
-        G.type({
-          type: G.literal('boolean', 'number', 'string'),
-        }),
-        G.partial({
-          pattern: G.string,
-        }),
-      ),
-    ),
-  ),
-  makeCompat(
-    FhirResourceList,
-    G.type({
-      oneOf: G.array(
-        G.type({
-          $ref: G.string,
-        }),
-      ),
-    }),
   ),
 );
 

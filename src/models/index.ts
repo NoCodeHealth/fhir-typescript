@@ -5,13 +5,14 @@ import { makePrimitives, FhirPrimitiveModel } from './primitive';
 import { makeResourceLists, FhirResourceListModel } from './resourceList';
 
 export * from './complex';
-export * from './declaration';
 export * from './model';
 export * from './primitive';
 export * from './resourceList';
 export * from './schema';
 
-const M = A.getMonoid<FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel>();
+export type FhirModels = FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel;
 
-export const makeModels = (schema: FhirSchema): (FhirComplexModel | FhirPrimitiveModel | FhirResourceListModel)[] =>
+const M = A.getMonoid<FhirModels>();
+
+export const makeModels = (schema: FhirSchema): FhirModels[] =>
   M.concat(makeComplex(schema), M.concat(makePrimitives(schema), makeResourceLists(schema)));
