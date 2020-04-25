@@ -14,12 +14,10 @@
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "outDir": "./lib",
-    "rootDir": "src",
     "sourceMap": false,
     "strict": true,
     "target": "es2018"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules/**/*", "src/scripts/**/*", "src/tests/**/*", "src/external/**/*"]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

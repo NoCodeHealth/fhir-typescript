@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "rootDir": "src/generated",
+    "outDir": "lib"
+  },
+  "include": ["src/generated"]
+}

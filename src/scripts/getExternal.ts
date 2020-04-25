@@ -4,7 +4,7 @@ import fs from 'fs';
 import request from 'request';
 import path from 'path';
 
-import { FhirSchema, FhirPrimitive } from '../schema';
+import { FhirSchema } from '../schema';
 
 const samplesUrl = 'http://hl7.org/fhir/examples-json.zip'
 const schemaUrl = 'http://hl7.org/fhir/fhir.schema.json.zip'
@@ -14,7 +14,7 @@ request.get({ url: samplesUrl, encoding: null }, (err, res, body) => {
     console.log(`Error downloading resources from ${samplesUrl}: ${err}`);
   }
 
-  const fixturesPath = path.join(process.cwd(), 'src/tests/fixtures');
+  const fixturesPath = path.join(process.cwd(), 'src/external');
 
   const zip = new AdmZip(body);
   const zipEntries = zip.getEntries();

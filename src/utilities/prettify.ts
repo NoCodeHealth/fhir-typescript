@@ -1,4 +1,4 @@
-import prettier from 'prettier';
+import * as prettier from 'prettier';
 
 export const prettyPrint = (content: string): string => {
   return prettier.format(content, {

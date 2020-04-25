@@ -9,10 +9,9 @@
     "lib"
   ],
   "scripts": {
-    "build": "yarn generate && tsc",
+    "build": "yarn generate && tsc -p tsconfig.build.json",
     "external": "ts-node src/scripts/getExternal.ts",
-    "cli": "node -r ts-node/register ./src/index.ts -i .external/fhir.schema.json -o output",
-    "generate": "yarn external && ts-node src/generate.ts",
+    "generate": "(rm -rf src/generated && mkdir src/generated && yarn external && ts-node src/index.ts)",
     "test": "jest"
   },
   "dependencies": {
