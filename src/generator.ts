@@ -1,4 +1,3 @@
-import * as t from 'io-ts-codegen';
 import * as A from 'fp-ts/lib/Array';
 import * as D from 'fp-ts/lib/Date';
 import * as E from 'fp-ts/lib/Either';
@@ -12,7 +11,7 @@ import { error, info } from './logging';
 import { FhirSchema } from './schema';
 import { jsonParse, readFileSync, resolvePath, writeFileSync } from './utilities/io';
 
-import { makeTypes } from './combinators';
+import { makeDeclarationFiles, DeclarationFile } from './combinators';
 import { makeModels } from './models';
 
 const readInput: (input: string) => IOE.IOEither<IO.IO<void>, string> = flow(
@@ -32,19 +31,7 @@ const decodeInput: (u: unknown) => IOE.IOEither<IO.IO<void>, FhirSchema> = flow(
   IOE.fromEither,
 );
 
-const generateTypes: (schema: FhirSchema) => string = flow(
-  makeModels,
-  A.map(makeTypes),
-  t.sort,
-  A.chain((d) => [t.printRuntime(d), t.printStatic(d)]),
-  (a) => A.cons(`import * as t from 'io-ts';`, a),
-  (a) => a.join('\n\n'),
-  // There are several enum keys that start with a number. Unfortunately, there is not a good
-  // way to handle this at the moment, so we have to replace them after the document has been
-  // generated.
-  // @see Issue - https://github.com/gcanti/io-ts/issues/309
-  (s) => s.replace(/\b(0|4|8|12):\s*null,{0,1}/g, `'$1': null,`).replace(/(0BSD):/, `'$1':`),
-);
+const generateFiles: (schema: FhirSchema) => DeclarationFile[] = flow(makeModels, makeDeclarationFiles);
 
 const writeOutput: (output: string) => (content: string) => IOE.IOEither<IO.IO<void>, void> = (output) =>
   flow(
@@ -58,8 +45,12 @@ const main = ({ input, output }: { input: string; output: string }) =>
     readInput,
     IOE.chain(parseInput),
     IOE.chain(decodeInput),
-    IOE.map(generateTypes),
-    IOE.chain(writeOutput(output)),
+    IOE.map(generateFiles),
+    IOE.chain((files) =>
+      A.array.sequence(IOE.ioEither)(
+        A.array.map(files, (file) => writeOutput(`${output}/${file.filename}.ts`)(file.content)),
+      ),
+    ),
     IOE.fold(
       (e) => e,
       () => pipe(D.create, IO.chain(info(`Successfully generated types for the FHIR JSON Schema to "${output}"`))),
@@ -68,5 +59,5 @@ const main = ({ input, output }: { input: string; output: string }) =>
 
 main({
   input: 'src/fhir.schema.json',
-  output: 'src/index.ts',
+  output: 'generated',
 })();

@@ -1,10 +1,9 @@
 import * as t from 'io-ts-codegen';
 
-import { PrimitiveModel } from '../models';
-import { prefixFhir } from '../utilities/naming';
+import { FhirPrimitiveModel } from '../models';
 import { makePrimitiveBrand } from '../validators';
 
-export const fromPrimitive = (m: PrimitiveModel): t.TypeReference => {
+export const fromPrimitive = (m: FhirPrimitiveModel): t.TypeReference => {
   switch (m.type) {
     case 'boolean':
       return t.booleanType;
@@ -16,8 +15,8 @@ export const fromPrimitive = (m: PrimitiveModel): t.TypeReference => {
   }
 };
 
-const toPrimitiveBrandCombinator = (m: PrimitiveModel): t.TypeReference =>
-  t.brandCombinator(fromPrimitive(m), (x) => makePrimitiveBrand(x, m), prefixFhir(m.name));
+const toPrimitiveBrandCombinator = (m: FhirPrimitiveModel): t.TypeReference =>
+  t.brandCombinator(fromPrimitive(m), (x) => makePrimitiveBrand(x, m), m.name);
 
-export const toPrimitiveType = (m: PrimitiveModel): t.TypeDeclaration =>
-  t.typeDeclaration(prefixFhir(m.name), toPrimitiveBrandCombinator(m), true, false, m.description);
+export const toPrimitiveType = (m: FhirPrimitiveModel): t.TypeDeclaration =>
+  t.typeDeclaration(m.name, toPrimitiveBrandCombinator(m), true, false, m.description);

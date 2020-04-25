@@ -13,7 +13,7 @@ export interface FhirResourceList {
   oneOf: { $ref: string }[];
 }
 
-export const isResourceList: Refinement<unknown, FhirResourceList> = (u): u is FhirResourceList =>
+export const isFhirResourceList: Refinement<unknown, FhirResourceList> = (u): u is FhirResourceList =>
   typeof u === 'object' && u !== null && 'oneOf' in u;
 
 export const FhirResourceList: C.Codec<FhirResourceList> = C.type({

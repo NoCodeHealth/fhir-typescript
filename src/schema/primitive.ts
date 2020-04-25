@@ -16,7 +16,7 @@ export interface FhirPrimitive extends FhirDescriptable {
   pattern?: string;
 }
 
-export const isPrimitive: Refinement<unknown, FhirPrimitive> = (u): u is FhirPrimitive =>
+export const isFhirPrimitive: Refinement<unknown, FhirPrimitive> = (u): u is FhirPrimitive =>
   typeof u === 'object' &&
   u !== null &&
   !('properties' in u) &&

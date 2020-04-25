@@ -1,1 +1,1 @@
-export type Model<URI, T> = { readonly _tag: URI; name: string } & T;
+export type FhirModel<URI, T> = { readonly _tag: URI; name: string } & T;

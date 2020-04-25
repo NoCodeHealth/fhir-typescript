@@ -65,5 +65,5 @@ request.get({ url: schemaUrl, encoding: null }, (err, res, body) => {
 
   const clean = m.Lens.fromPath<FhirSchema>()(['definitions', 'xhtml']).modify(a => ({...a , type: 'string' }));
 
-  fs.writeFileSync(path.join(schemaPath, 'fhir.schema.json'), JSON.stringify(clean(schema)));
+  fs.writeFileSync(path.join(schemaPath, 'fhir.schema.json'), JSON.stringify(clean(schema), undefined, 2));
 })

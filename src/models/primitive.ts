@@ -1,30 +1,29 @@
 import * as m from 'monocle-ts';
 import * as A from 'fp-ts/lib/Array';
 import * as T from 'fp-ts/lib/Tuple';
-import { flow, Refinement } from 'fp-ts/lib/function';
+import { flow } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 
-import { isPrimitive, FhirPrimitive, FhirSchema } from '../schema';
+import { isFhirPrimitive, FhirPrimitive, FhirSchema } from '../schema';
 import { objectToEntries } from '../utilities/lenses';
-import { Model } from './model';
+import { prefixFhir } from '../utilities/naming';
+import { FhirModel } from './model';
 
-export interface PrimitiveModel extends Model<'primitive', FhirPrimitive> {}
+export interface FhirPrimitiveModel extends FhirModel<'primitive', FhirPrimitive> {}
 
-export const PrimitiveModel = (def: [string, FhirPrimitive]): PrimitiveModel => ({
+export const FhirPrimitiveModel = (def: [string, FhirPrimitive]): FhirPrimitiveModel => ({
   _tag: 'primitive',
-  name: T.fst(def),
+  name: pipe(T.fst(def), prefixFhir),
   ...T.snd(def),
 });
-
-export const isPrimitiveModel: Refinement<unknown, PrimitiveModel> = (u): u is PrimitiveModel =>
-  u && typeof u !== 'undefined' && (u as PrimitiveModel)._tag === 'primitive';
 
 const lensToPrimitives = m.Lens.fromProp<FhirSchema>()('definitions')
   .composeIso(objectToEntries())
   .composeTraversal(m.fromTraversable(A.array)())
-  .filter(flow(T.snd, isPrimitive))
+  .filter(flow(T.snd, isFhirPrimitive))
   .asFold() as m.Fold<FhirSchema, [string, FhirPrimitive]>;
 
-export const makePrimitives: (schema: FhirSchema) => PrimitiveModel[] = flow(
+export const makePrimitives: (schema: FhirSchema) => FhirPrimitiveModel[] = flow(
   lensToPrimitives.getAll,
-  A.map(PrimitiveModel),
+  A.map(FhirPrimitiveModel),
 );

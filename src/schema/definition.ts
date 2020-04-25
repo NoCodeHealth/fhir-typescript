@@ -2,11 +2,11 @@ import * as C from 'io-ts/lib/Codec';
 import * as G from 'io-ts/lib/Guard';
 
 import { makeCompat, untaggedUnion, Compat } from '../utilities/codecs';
-import { isComplex, FhirComplex } from './complex';
+import { isFhirComplex, FhirComplex } from './complex';
 import { FhirDescriptableGuard } from './descriptable';
-import { isPrimitive, FhirPrimitive } from './primitive';
+import { isFhirPrimitive, FhirPrimitive } from './primitive';
 import { FhirProperty } from './property';
-import { isResourceList, FhirResourceList } from './resourceList';
+import { isFhirResourceList, FhirResourceList } from './resourceList';
 
 /**
  * Represents a definition of a primitive or complex data type.
@@ -55,18 +55,18 @@ export const FhirDefinition: Compat<FhirDefinition> = untaggedUnion(
 
 export const isPrimitiveDefinition: C.Codec<FhirPrimitive> = C.refinement<FhirDefinition, FhirPrimitive>(
   FhirDefinition,
-  isPrimitive,
+  isFhirPrimitive,
   'FhirPrimitive',
 );
 
 export const isComplexDefinition: C.Codec<FhirComplex> = C.refinement<FhirDefinition, FhirComplex>(
   FhirDefinition,
-  isComplex,
+  isFhirComplex,
   'FhirComplex',
 );
 
 export const isResourceListDefinition: C.Codec<FhirResourceList> = C.refinement<FhirDefinition, FhirResourceList>(
   FhirDefinition,
-  isResourceList,
+  isFhirResourceList,
   'FhirResourceList',
 );

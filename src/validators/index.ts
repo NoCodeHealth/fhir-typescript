@@ -1,6 +1,4 @@
-import * as A from 'fp-ts/lib/Array';
-
-import { PrimitiveModel } from '../models';
+import { FhirPrimitiveModel } from '../models';
 import { checkInteger } from './checkInteger';
 import { checkMaximum } from './checkMaximum';
 import { checkMaxItems } from './checkMaxItems';
@@ -11,7 +9,7 @@ import { checkMinLength } from './checkMinLength';
 import { checkMultipleOf } from './checkMultipleOf';
 import { checkPattern } from './checkPattern';
 
-export const makePrimitiveBrand = (x: string, m: PrimitiveModel) =>
+export const makePrimitiveBrand = (x: string, m: FhirPrimitiveModel) =>
   m.pattern ? checkPattern(x, m.pattern) : 'true';
 
 export const generateChecks = <T extends Record<string, any>>(x: string, schema: T): string => {

@@ -8,6 +8,9 @@ export const jsonParse = (s: string): E.Either<Error, unknown> => E.tryCatch(() 
 export const readFileSync = (p: string): IOE.IOEither<Error, string> =>
   IOE.tryCatch(() => fs.readFileSync(p, 'utf8'), E.toError);
 
+export const readDirSync = (p: string): IOE.IOEither<Error, string[]> =>
+  IOE.tryCatch(() => fs.readdirSync(p, 'utf8'), E.toError);
+
 export const resolvePath = (p: string): string => path.resolve(process.cwd(), p);
 
 export const writeFileSync = (p: string) => (content: string): IOE.IOEither<Error, void> =>
