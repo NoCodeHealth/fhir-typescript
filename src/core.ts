@@ -10,8 +10,8 @@ import { draw } from 'io-ts/lib/Tree'
 import * as path from 'path'
 import * as prettier from 'prettier'
 
-import { Resource } from './resources'
 import { FhirSchema } from './decoder'
+import { Resource } from './parser'
 
 /**
  * @since 0.0.1

@@ -8,7 +8,7 @@ import * as fs from 'fs-extra'
 import * as rimraf from 'rimraf'
 
 import * as core from './core'
-import * as resources from './resources'
+import * as resources from './parser'
 
 const capabilities: core.Capabilities = {
   ...TE.taskEither,
