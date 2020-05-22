@@ -12,7 +12,7 @@
     "build": "yarn cli && tsc -p ./tsconfig.build.json && tsc -p tsconfig.build-es6.json",
     "postbuild": "prettier --write \"./{lib,es6}/**/*.ts\"",
     "external": "ts-node src/scripts/getExternal.ts",
-    "cli": "ts-node fhir-codegen.ts",
+    "cli": "ts-node src/bin.ts",
     "test": "jest"
   },
   "dependencies": {
