@@ -1,3 +1,4 @@
+import { TypeDeclaration } from 'io-ts-codegen'
 import * as A from 'fp-ts/lib/Array'
 import * as Eq from 'fp-ts/lib/Eq'
 import * as M from 'fp-ts/lib/Monoid'
@@ -12,10 +13,10 @@ import {
   isComplexDefinition,
   isRefArrayItem,
   isRefProperty,
-  parseRef,
-  Definition
+  parseRef
 } from './definitions'
 import { FhirArray, FhirRef, FhirRefArrayItem, FhirComplex, FhirDefinition, FhirSchema } from './schema'
+import { toDefinitionType } from './typegen'
 
 /**
  * @since 0.0.1
@@ -23,7 +24,7 @@ import { FhirArray, FhirRef, FhirRefArrayItem, FhirComplex, FhirDefinition, Fhir
 export interface Resource {
   name: string
   formattedName: string
-  definition: Definition
+  typeDef: TypeDeclaration
   references: ReadonlyArray<string>
 }
 
@@ -74,7 +75,7 @@ export const makeResources: (schema: FhirSchema) => Array<Resource> = (s) =>
     A.map(([name, def]) => ({
       name,
       formattedName: formatName(name),
-      definition: definition(def),
+      typeDef: toDefinitionType(formatName(name), definition(def)),
       references: toRefs(def)
     }))
   )

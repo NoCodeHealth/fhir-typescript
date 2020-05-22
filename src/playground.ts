@@ -1,10 +1,34 @@
-import * as util from 'util'
+import * as c from 'io-ts-codegen'
+import * as A from 'fp-ts/lib/Array'
+import * as fs from 'fs'
+import * as path from 'path'
+// import * as util from 'util'
 
-import { makeResources } from './Resource'
+import { makeResources } from './resources'
 
 // @ts-ignore
 const resources = makeResources({
   definitions: {
+    base64Binary: {
+      type: 'string',
+      description: 'A stream of bytes'
+    },
+    boolean: {
+      pattern: '^true|false$',
+      type: 'boolean',
+      description: 'Value of "true" or "false"'
+    },
+    canonical: {
+      pattern: '^\\S*$',
+      type: 'string',
+      description: 'A URI that is a reference to a canonical URL on a FHIR resource'
+    },
+    code: {
+      pattern: '^[^\\s]+(\\s[^\\s]+)*$',
+      type: 'string',
+      description:
+        'A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents'
+    },
     Account: {
       description:
         'A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.',
@@ -148,4 +172,11 @@ const resources = makeResources({
   }
 })
 
-console.log(util.inspect(resources, { depth: null }))
+fs.writeFileSync(
+  path.resolve(process.cwd(), 'test.ts'),
+  A.cons(
+    [`import * as t from 'io-ts'`],
+    resources.map(({ typeDef }) => [c.printStatic(typeDef), c.printRuntime(typeDef)])
+  ).join('\n'),
+  { encoding: 'utf8' }
+)

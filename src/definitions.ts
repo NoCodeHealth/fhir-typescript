@@ -1,8 +1,10 @@
+import * as A from 'fp-ts/lib/Array'
 import * as O from 'fp-ts/lib/Option'
 import * as RA from 'fp-ts/lib/ReadonlyArray'
 import * as RR from 'fp-ts/lib/ReadonlyRecord'
 import { absurd, tuple, Refinement } from 'fp-ts/lib/function'
 import { pipe } from 'fp-ts/lib/pipeable'
+import { Lens, fromTraversable } from 'monocle-ts'
 import capitalize from 'lodash.capitalize'
 
 import {
@@ -111,42 +113,42 @@ export const isComplexDefinition: Refinement<FhirDefinition, FhirComplex> = (d):
 /**
  * @since 0.0.1
  */
-export interface PrimitiveDef extends Def<'FhirPrimitive', FhirPrimitive> {}
+export interface PrimitiveDef extends Def<'Primitive', FhirPrimitive> {}
 
 /**
  * @since 0.0.1
  */
-export const primitiveDef: (a: FhirPrimitive) => PrimitiveDef = (a) => ({ _tag: 'FhirPrimitive', ...a })
+export const primitiveDef: (a: FhirPrimitive) => PrimitiveDef = (a) => ({ _tag: 'Primitive', ...a })
 
 /**
  * @since 0.0.1
  */
-export interface ConstDef extends Def<'FhirConst', FhirConst> {}
+export interface ConstDef extends Def<'Const', FhirConst> {}
 
 /**
  * @since 0.0.1
  */
-export const constDef: (a: FhirConst) => ConstDef = (a) => ({ _tag: 'FhirConst', ...a })
+export const constDef: (a: FhirConst) => ConstDef = (a) => ({ _tag: 'Const', ...a })
 
 /**
  * @since 0.0.1
  */
-export interface EnumDef extends Def<'FhirEnum', FhirEnum> {}
+export interface EnumDef extends Def<'Enum', FhirEnum> {}
 
 /**
  * @since 0.0.1
  */
-export const enumDef: (a: FhirEnum) => EnumDef = (a) => ({ _tag: 'FhirEnum', ...a })
+export const enumDef: (a: FhirEnum) => EnumDef = (a) => ({ _tag: 'Enum', ...a })
 
 /**
  * @since 0.0.1
  */
-export interface RefDef extends Def<'FhirRef', FhirRef> {}
+export interface RefDef extends Def<'Ref', FhirRef> {}
 
 /**
  * @since 0.0.1
  */
-export const refDef: (a: FhirRef) => RefDef = (a) => ({ _tag: 'FhirRef', ...a, $ref: parseRef(a.$ref) })
+export const refDef: (a: FhirRef) => RefDef = (a) => ({ _tag: 'Ref', ...a, $ref: parseRef(a.$ref) })
 
 /**
  * @since 0.0.1
@@ -166,7 +168,11 @@ export interface RefArrayItemDef extends Def<'RefArrayItem', FhirRefArrayItem> {
 /**
  * @since 0.0.1
  */
-export const refArrayItemDef: (a: FhirRefArrayItem) => RefArrayItemDef = (a) => ({ _tag: 'RefArrayItem', ...a })
+export const refArrayItemDef: (a: FhirRefArrayItem) => RefArrayItemDef = (a) => ({
+  _tag: 'RefArrayItem',
+  ...a,
+  $ref: parseRef(a.$ref)
+})
 
 /**
  * @since 0.0.1
@@ -238,12 +244,25 @@ export const complexDef: (a: FhirComplex) => ComplexDef = (a) => ({
 /**
  * @since 0.0.1
  */
-export interface ResourceListDef extends Def<'ResourceList', FhirResourceList> {}
+export interface ResourceListDef extends Def<'ResourceList', Omit<FhirResourceList, 'oneOf'>> {
+  oneOf: Array<string>
+}
 
 /**
  * @since 0.0.1
  */
-export const resourceListDef: (a: FhirResourceList) => ResourceListDef = (a) => ({ _tag: 'ResourceList', ...a })
+export const resourceListDef: (a: FhirResourceList) => ResourceListDef = (a) => ({
+  _tag: 'ResourceList',
+  ...a,
+  oneOf: pipe(
+    Lens.fromProp<FhirResourceList>()('oneOf')
+      .composeTraversal(fromTraversable(A.array)())
+      .composeLens(Lens.fromProp<{ $ref: string }>()('$ref'))
+      .asFold()
+      .getAll(a),
+    A.map(parseRef)
+  )
+})
 
 /**
  * @since 0.0.1
