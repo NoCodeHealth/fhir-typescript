@@ -12,6 +12,7 @@
     "build": "yarn generate && tsc -p tsconfig.build.json",
     "external": "ts-node src/scripts/getExternal.ts",
     "generate": "(rm -rf src/generated && mkdir src/generated && yarn external && ts-node src/index.ts)",
+    "playground": "ts-node src/playground.ts",
     "test": "jest"
   },
   "dependencies": {

@@ -1,23 +1,21 @@
 import * as A from 'fp-ts/lib/Array'
 import * as Eq from 'fp-ts/lib/Eq'
 import * as M from 'fp-ts/lib/Monoid'
-import * as O from 'fp-ts/lib/Option'
 import * as R from 'fp-ts/lib/Record'
-import { Refinement } from 'fp-ts/lib/function'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { fromTraversable, Iso, Lens, Prism } from 'monocle-ts'
-import capitalize from 'lodash.capitalize'
 
 import {
-  FhirArray,
-  FhirArrayItem,
-  FhirRef,
-  FhirRefArrayItem,
-  FhirComplex,
-  FhirDefinition,
-  FhirProperty,
-  FhirSchema
-} from './Schema'
+  definition,
+  formatName,
+  isArrayProperty,
+  isComplexDefinition,
+  isRefArrayItem,
+  isRefProperty,
+  parseRef,
+  Definition
+} from './Definition'
+import { FhirArray, FhirRef, FhirRefArrayItem, FhirComplex, FhirDefinition, FhirSchema } from './Schema'
 
 /**
  * @since 0.0.1
@@ -25,7 +23,7 @@ import {
 export interface Resource {
   name: string
   formattedName: string
-  definition: FhirDefinition
+  definition: Definition
   references: ReadonlyArray<string>
 }
 
@@ -36,27 +34,6 @@ const objectToEntries = <T>(): Iso<Record<string, T>, Array<[string, T]>> =>
     (s) => Object.entries(s),
     (a) => a.reduce((q, r) => ({ ...q, [r[0]]: r[1] }), {})
   )
-
-const formatName: (identifier: string) => string = (i) => `Fhir${capitalize(i)}`
-
-const parseRef: (ref: string) => string = (r) =>
-  pipe(
-    r.split('/'),
-    A.last,
-    O.map(formatName),
-    O.getOrElse(() => '')
-  )
-
-const isComplexDefinition: Refinement<FhirDefinition, FhirComplex> = (d): d is FhirComplex =>
-  typeof d !== 'undefined' && 'properties' in d
-
-const isRefProperty: Refinement<FhirProperty, FhirRef> = (p): p is FhirRef => typeof p !== 'undefined' && '$ref' in p
-
-const isArrayProperty: Refinement<FhirProperty, FhirArray> = (p): p is FhirArray =>
-  typeof p !== 'undefined' && 'type' in p && (p as FhirArray).type === 'array'
-
-const isRefArrayItem: Refinement<FhirArrayItem, FhirRefArrayItem> = (i): i is FhirRefArrayItem =>
-  typeof i !== 'undefined' && '$ref' in i
 
 const lensToDefinitions = Lens.fromProp<FhirSchema>()('definitions')
 
@@ -94,10 +71,10 @@ export const makeResources: (schema: FhirSchema) => Array<Resource> = (s) =>
   pipe(
     s,
     lensToDefinitions.composeIso(objectToEntries()).composeTraversal(fromTraversable(A.array)()).asFold().getAll,
-    A.map(([name, definition]) => ({
+    A.map(([name, def]) => ({
       name,
       formattedName: formatName(name),
-      definition,
-      references: toRefs(definition)
+      definition: definition(def),
+      references: toRefs(def)
     }))
   )
