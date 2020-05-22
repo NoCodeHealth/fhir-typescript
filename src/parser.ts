@@ -16,7 +16,7 @@ import {
   isRefArrayItem,
   isRefProperty,
   parseRef
-} from './definitions'
+} from './models'
 import {
   FhirArray,
   FhirRef,

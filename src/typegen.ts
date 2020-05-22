@@ -2,7 +2,7 @@ import * as R from 'fp-ts/lib/Record'
 import { absurd } from 'fp-ts/lib/function'
 import * as t from 'io-ts-codegen'
 
-import { formatName, ArrayDef, ComplexDef, Definition, PrimitiveDef, PropertyDef, ResourceListDef } from './definitions'
+import { formatName, ArrayDef, ComplexDef, Definition, PrimitiveDef, PropertyDef, ResourceListDef } from './models'
 import { checks } from './validation'
 
 const getPrimitiveType: (d: PrimitiveDef) => t.TypeReference = (d) => {
