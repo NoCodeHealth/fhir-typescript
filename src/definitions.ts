@@ -19,7 +19,7 @@ import {
   FhirRef,
   FhirRefArrayItem,
   FhirResourceList
-} from './schema'
+} from './decoder'
 
 type Def<URI, T> = { readonly _tag: URI } & T
 

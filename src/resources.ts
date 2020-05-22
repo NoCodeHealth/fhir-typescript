@@ -25,7 +25,7 @@ import {
   FhirSchema,
   FhirResourceList,
   FhirDefinition
-} from './schema'
+} from './decoder'
 import { toDefinitionType } from './typegen'
 
 /**

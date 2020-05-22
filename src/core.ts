@@ -11,7 +11,7 @@ import * as path from 'path'
 import * as prettier from 'prettier'
 
 import { Resource } from './resources'
-import { FhirSchema } from './schema'
+import { FhirSchema } from './decoder'
 
 /**
  * @since 0.0.1
