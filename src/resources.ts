@@ -14,8 +14,8 @@ import {
   isRefProperty,
   parseRef,
   Definition
-} from './Definition'
-import { FhirArray, FhirRef, FhirRefArrayItem, FhirComplex, FhirDefinition, FhirSchema } from './Schema'
+} from './definitions'
+import { FhirArray, FhirRef, FhirRefArrayItem, FhirComplex, FhirDefinition, FhirSchema } from './schema'
 
 /**
  * @since 0.0.1
