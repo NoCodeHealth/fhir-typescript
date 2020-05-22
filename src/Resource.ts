@@ -17,12 +17,12 @@ import {
   FhirDefinition,
   FhirProperty,
   FhirSchema
-} from './FhirSchema'
+} from './Schema'
 
 /**
  * @since 0.0.1
  */
-export interface Model {
+export interface Resource {
   name: string
   formattedName: string
   definition: FhirDefinition
@@ -90,7 +90,7 @@ const toRefs: (definition: FhirDefinition) => Array<string> = (d) =>
 /**
  * @since 0.0.1
  */
-export const makeModels: (schema: FhirSchema) => Array<Model> = (s) =>
+export const makeResources: (schema: FhirSchema) => Array<Resource> = (s) =>
   pipe(
     s,
     lensToDefinitions.composeIso(objectToEntries()).composeTraversal(fromTraversable(A.array)()).asFold().getAll,
