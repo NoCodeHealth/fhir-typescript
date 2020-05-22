@@ -83,13 +83,19 @@ const resourceListCombinator: (definition: ResourceListDef) => t.TypeReference =
 export const toDefinitionType: (name: string, definition: Definition) => t.TypeDeclaration = (n, d) => {
   switch (d._tag) {
     case 'Complex':
-      return t.typeDeclaration(n, complexCombinator(d), true, false, d.description)
+      return t.typeDeclaration(
+        n,
+        t.recursiveCombinator(t.identifier(n), n, complexCombinator(d)),
+        true,
+        false,
+        d.description
+      )
 
     case 'Primitive':
       return t.typeDeclaration(n, primitiveCombinator(d), true, false, d.description)
 
     case 'ResourceList':
-      return t.typeDeclaration(n, resourceListCombinator(d), true, false)
+      return t.typeDeclaration(n, t.recursiveCombinator(t.identifier(n), n, resourceListCombinator(d)), true, false)
 
     default:
       return absurd<t.TypeDeclaration>((null as any) as never)

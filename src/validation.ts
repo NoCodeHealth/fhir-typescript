@@ -5,71 +5,75 @@ import { pipe } from 'fp-ts/lib/pipeable'
 /**
  * @since 0.0.1
  */
-export const checkInteger: (a: string) => string = (a) => `(Number.isInteger(${a}))`
+export const checkDefined: (x: string) => string = (x) => `typeof ${x} !== 'undefined'`
 
 /**
  * @since 0.0.1
  */
-export const checkMaximum: (a: string, maximum: number) => string = (a, m) =>
-  `(typeof ${a} !== 'number' || ${a} <= ${m})`
+export const checkInteger: (x: string) => string = (x) => `(Number.isInteger(${x}))`
 
 /**
  * @since 0.0.1
  */
-export const checkMaxItems: (a: string, maxItems: number) => string = (a, m) =>
-  `(!Array.isArray(${a}) || ${a}.length <= ${m})`
+export const checkMaximum: (x: string, maximum: number) => string = (x, m) =>
+  `(typeof ${x} !== 'number' || ${x} <= ${m})`
 
 /**
  * @since 0.0.1
  */
-export const checkMaxLength: (a: string, maxLength: number) => string = (a, m) =>
-  `(typeof ${a} !== 'string' || ${a}.length <= ${m})`
+export const checkMaxItems: (x: string, maxItems: number) => string = (x, m) =>
+  `(!Array.isArray(${x}) || ${x}.length <= ${m})`
 
 /**
  * @since 0.0.1
  */
-export const checkMinimum: (a: string, minimum: number) => string = (a, m) =>
-  `(typeof ${a} !== 'number' || ${a} >= ${m})`
+export const checkMaxLength: (x: string, maxLength: number) => string = (x, m) =>
+  `(typeof ${x} !== 'string' || ${x}.length <= ${m})`
 
 /**
  * @since 0.0.1
  */
-export const checkMinItems: (a: string, minItems: number) => string = (a, m) =>
-  `(!Array.isArray(${a}) || ${a}.length >= ${m})`
+export const checkMinimum: (xxx: string, minimum: number) => string = (xxx, m) =>
+  `(typeof ${xxx} !== 'number' || ${xxx} >= ${m})`
 
 /**
  * @since 0.0.1
  */
-export const checkMinLength: (a: string, minLength: number) => string = (a, m) =>
-  `(typeof ${a} !== 'string' || ${a}.length >= ${m})`
+export const checkMinItems: (xx: string, minItems: number) => string = (xx, m) =>
+  `(!Array.isArray(${xx}) || ${xx}.length >= ${m})`
 
 /**
  * @since 0.0.1
  */
-export const checkMultipleOf: (a: string, divisor: number) => string = (a, d) =>
-  `(typeof ${a} !== 'number' || ${a} % ${d} === 0)`
+export const checkMinLength: (x: string, minLength: number) => string = (x, m) =>
+  `(typeof ${x} !== 'string' || ${x}.length >= ${m})`
 
 /**
  * @since 0.0.1
  */
-export const checkPattern: (a: string, pattern: string) => string = (a, p) =>
-  `(typeof ${a} !== 'string' || /${p}/.test(${a}))`
+export const checkMultipleOf: (x: string, divisor: number) => string = (x, d) =>
+  `(typeof ${x} !== 'number' || ${x} % ${d} === 0)`
 
-export const checks: <A extends Record<string, any>>(s: string, x: A) => string = (s, x) => {
-  const cs = pipe(
+/**
+ * @since 0.0.1
+ */
+export const checkPattern: (x: string, pattern: string) => string = (x, p) =>
+  `(typeof ${x} !== 'string' || /${p}/.test(${x}))`
+
+export const checks: <A extends Record<string, any>>(x: string, a: A) => string = (x, a) =>
+  pipe(
     [
-      'pattern' in x ? O.some(checkPattern(s, x.pattern)) : O.none,
-      'minLength' in x ? O.some(checkMinLength(s, x.minLength)) : O.none,
-      'maxLength' in x ? O.some(checkMaxLength(s, x.maxLength)) : O.none,
-      'minimum' in x ? O.some(checkMinimum(s, x.minimum)) : O.none,
-      'maximum' in x ? O.some(checkMaximum(s, x.maximum)) : O.none,
-      'multipleOf' in x ? O.some(checkMultipleOf(s, x.multipleOf)) : O.none,
-      'type' in x && x.type === 'integer' ? O.some(checkInteger(s)) : O.none,
-      'minItems' in x ? O.some(checkMinItems(s, x.minItems)) : O.none,
-      'maxItems' in x ? O.some(checkMaximum(s, x.multipleOf)) : O.none
+      O.some(checkDefined(x)),
+      'pattern' in a ? O.some(checkPattern(x, a.pattern)) : O.none,
+      'minLength' in a ? O.some(checkMinLength(x, a.minLength)) : O.none,
+      'maxLength' in a ? O.some(checkMaxLength(x, a.maxLength)) : O.none,
+      'minimum' in a ? O.some(checkMinimum(x, a.minimum)) : O.none,
+      'maximum' in a ? O.some(checkMaximum(x, a.maximum)) : O.none,
+      'multipleOf' in a ? O.some(checkMultipleOf(x, a.multipleOf)) : O.none,
+      'type' in a && a.type === 'integer' ? O.some(checkInteger(x)) : O.none,
+      'minItems' in a ? O.some(checkMinItems(x, a.minItems)) : O.none,
+      'maxItems' in a ? O.some(checkMaximum(x, a.multipleOf)) : O.none
     ],
-    A.compact
+    A.compact,
+    A.reduceRight('', (a, b) => (a && b ? `${a} && ${b}` : a))
   )
-
-  return cs.length ? cs.join(' && ') : 'true'
-}

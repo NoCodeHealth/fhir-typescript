@@ -5,7 +5,6 @@ import * as RR from 'fp-ts/lib/ReadonlyRecord'
 import { absurd, tuple, Refinement } from 'fp-ts/lib/function'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { Lens, fromTraversable } from 'monocle-ts'
-import capitalize from 'lodash.capitalize'
 
 import {
   FhirArray,
@@ -24,10 +23,12 @@ import {
 
 type Def<URI, T> = { readonly _tag: URI } & T
 
+export const upperFirst = (word: string): string => `${word.charAt(0).toUpperCase()}${word.slice(1)}`
+
 /**
  * @since 0.0.1
  */
-export const formatName: (identifier: string) => string = (i) => `Fhir${capitalize(i)}`
+export const formatName: (identifier: string) => string = (i) => `Fhir${upperFirst(i)}`
 
 /**
  * @since 0.0.1
@@ -103,12 +104,6 @@ export const isPrimitiveProperty: Refinement<FhirProperty, FhirPrimitive> = (p):
   typeof p !== 'undefined' &&
   !('properties' in p) &&
   ['boolean', 'number', 'string'].some((key) => (p as FhirPrimitive).type === key)
-
-/**
- * @since 0.0.1
- */
-export const isComplexDefinition: Refinement<FhirDefinition, FhirComplex> = (d): d is FhirComplex =>
-  typeof d !== 'undefined' && 'properties' in d
 
 /**
  * @since 0.0.1

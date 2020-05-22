@@ -235,7 +235,7 @@ export const FhirComplex = descriptable(
        */
       additionalProperties: D.literal(false)
     }),
-    D.type({
+    D.partial({
       /**
        * Properties that must be present for the data type to be considered valid.
        */
