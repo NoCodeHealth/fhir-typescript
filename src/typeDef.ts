@@ -76,13 +76,13 @@ const complexCombinator: (definition: ComplexDef) => t.TypeReference = (def) => 
     def.properties.map(
       ([name, definition]) =>
         /* eslint-disable no-prototype-builtins */
-        t.property(name, propertyCombinator(definition), R.hasOwnProperty(name, required), def.description)
+        t.property(name, propertyCombinator(definition), !R.hasOwnProperty(name, required), def.description)
       /* eslint-enable no-prototype-builtins */
     )
   )
 }
 const resourceListCombinator: (definition: ResourceListDef) => t.TypeReference = (def) =>
-  t.interfaceCombinator([t.property('oneOf', t.unionCombinator(def.oneOf.map(t.identifier)), false)])
+  t.unionCombinator(def.oneOf.map(t.identifier))
 
 /**
  * @since 0.0.1

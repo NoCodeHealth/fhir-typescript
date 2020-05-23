@@ -106,7 +106,3 @@ dist/
 # Temporary folders
 tmp/
 temp/
-
-# External data
-external/
-generated/

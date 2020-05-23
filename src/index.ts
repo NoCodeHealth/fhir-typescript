@@ -11,7 +11,8 @@ import * as core from './core'
 
 const capabilities: core.Capabilities = {
   ...TE.taskEither,
-  readFile: (path) => TE.rightIO(() => fs.readFileSync(path, { encoding: 'utf8' })),
+  readFile: (path) => TE.rightIO(() => fs.readFileSync(path, { encoding: 'utf-8' })),
+  readDir: (path) => TE.rightIO(() => fs.readdirSync(path, { encoding: 'utf-8' })),
   writeFile: (path, content) => TE.rightIO(() => fs.outputFileSync(path, content)),
   existsFile: (path) => TE.rightIO(() => fs.existsSync(path)),
   clean: (pattern) => TE.rightIO(() => rimraf.sync(pattern)),
