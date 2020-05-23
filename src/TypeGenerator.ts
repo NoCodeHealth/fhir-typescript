@@ -4,9 +4,9 @@ import { absurd } from 'fp-ts/lib/function'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as t from 'io-ts-codegen'
 
-import { ArrayDef, ComplexDef, Definition, PrimitiveDef, PropertyDef, ResourceListDef } from './model'
-import { prefixFhir } from './module'
-import { checks } from './validation'
+import { prefixFhir } from './ModuleParser'
+import { ArrayDef, ComplexDef, Definition, PrimitiveDef, PropertyDef, ResourceListDef } from './SchemaModel'
+import { validate } from './TypeValidator'
 
 const CLRF = '\n\n'
 
@@ -29,7 +29,7 @@ const getPrimitiveType: (d: PrimitiveDef) => t.TypeReference = (d) => {
 }
 
 const primitiveCombinator: (definition: PrimitiveDef) => t.TypeReference = (def) =>
-  t.brandCombinator(getPrimitiveType(def), (a) => checks(a, def), prefixFhir(def.type))
+  t.brandCombinator(getPrimitiveType(def), (a) => validate(a, def), prefixFhir(def.type))
 
 const arrayPropertyCombinator: (definition: ArrayDef) => t.TypeReference = (def) => {
   switch (def.items._tag) {
@@ -116,6 +116,6 @@ function printTypeDeclaration(declaration: t.TypeDeclaration): string {
 /**
  * @since 0.0.1
  */
-export function typeDef(name: string, definition: Definition): string {
+export function generateTypes(name: string, definition: Definition): string {
   return pipe(toTypeDeclaration(name, definition), printTypeDeclaration)
 }

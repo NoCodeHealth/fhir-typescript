@@ -7,9 +7,9 @@ import * as chalk from 'chalk'
 import * as fs from 'fs-extra'
 import * as rimraf from 'rimraf'
 
-import * as core from './core'
+import * as program from './Program'
 
-const capabilities: core.Capabilities = {
+const capabilities: program.Capabilities = {
   ...TE.taskEither,
   readFile: (path) => TE.rightIO(() => fs.readFileSync(path, { encoding: 'utf-8' })),
   readDir: (path) => TE.rightIO(() => fs.readdirSync(path, { encoding: 'utf-8' })),
@@ -39,4 +39,4 @@ function onRight(): T.Task<void> {
 /**
  * @since 0.0.1
  */
-export const main: T.Task<void> = pipe(core.main(capabilities), TE.fold(onLeft, onRight))
+export const main: T.Task<void> = pipe(program.main(capabilities), TE.fold(onLeft, onRight))

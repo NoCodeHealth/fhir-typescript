@@ -16,5 +16,5 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "include": ["./src/", "./test", "./scripts", "environment.d.ts"]
+  "include": ["./src", "./test", "./scripts", "./environment.d.ts"]
 }

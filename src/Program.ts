@@ -8,10 +8,10 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import { draw } from 'io-ts/lib/Tree'
 import * as path from 'path'
 
-import { FhirSchema } from './decoder'
-import { makeModules, Module } from './module'
-import { printIndex, printModule } from './print'
-import { printTest } from './test'
+import { FhirSchema } from './SchemaDecoder'
+import { makeModules, Module } from './ModuleParser'
+import { printIndex, printModule } from './ModulePrinter'
+import { printTest } from './TestPrinter'
 
 /**
  * @since 0.0.1

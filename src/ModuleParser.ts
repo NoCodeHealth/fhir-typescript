@@ -16,9 +16,9 @@ import {
   FhirRefArrayItem,
   FhirResourceList,
   FhirSchema
-} from './decoder'
-import { definition, isArrayProperty, isComplex, isRefArrayItem, isRefProperty, isResourceList } from './model'
-import { typeDef } from './typeDef'
+} from './SchemaDecoder'
+import { definition, isArrayProperty, isComplex, isRefArrayItem, isRefProperty, isResourceList } from './SchemaModel'
+import { generateTypes } from './TypeGenerator'
 
 /**
  * @since 0.0.1
@@ -103,7 +103,7 @@ const traversableObjectEntries = schemaToDefinitions
   .asFold()
 
 function getContent(name: string, def: FhirDefinition): string {
-  return typeDef(prefixFhir(name), definition(def))
+  return generateTypes(prefixFhir(name), definition(def))
 }
 
 function getImports(name: string, def: FhirDefinition): Array<string> {

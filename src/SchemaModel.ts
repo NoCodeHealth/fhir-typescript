@@ -5,6 +5,7 @@ import { absurd, tuple, Refinement } from 'fp-ts/lib/function'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { Lens, fromTraversable } from 'monocle-ts'
 
+import { parseRef } from './ModuleParser'
 import {
   FhirArray,
   FhirArrayItem,
@@ -18,8 +19,7 @@ import {
   FhirRef,
   FhirRefArrayItem,
   FhirResourceList
-} from './decoder'
-import { parseRef } from './module'
+} from './SchemaDecoder'
 
 type Def<URI, T> = { readonly _tag: URI } & T
 
@@ -90,7 +90,7 @@ export const isPrimitiveProperty: Refinement<FhirProperty, FhirPrimitive> = (p):
 /**
  * @since 0.0.1
  */
-export interface PrimitiveDef extends Def<'Primitive', FhirPrimitive> {}
+export type PrimitiveDef = Def<'Primitive', FhirPrimitive>
 
 /**
  * @since 0.0.1
@@ -100,7 +100,7 @@ export const primitiveDef: (a: FhirPrimitive) => PrimitiveDef = (a) => ({ _tag: 
 /**
  * @since 0.0.1
  */
-export interface ConstDef extends Def<'Const', FhirConst> {}
+export type ConstDef = Def<'Const', FhirConst>
 
 /**
  * @since 0.0.1
@@ -110,7 +110,7 @@ export const constDef: (a: FhirConst) => ConstDef = (a) => ({ _tag: 'Const', ...
 /**
  * @since 0.0.1
  */
-export interface EnumDef extends Def<'Enum', FhirEnum> {}
+export type EnumDef = Def<'Enum', FhirEnum>
 
 /**
  * @since 0.0.1
@@ -120,7 +120,7 @@ export const enumDef: (a: FhirEnum) => EnumDef = (a) => ({ _tag: 'Enum', ...a })
 /**
  * @since 0.0.1
  */
-export interface RefDef extends Def<'Ref', FhirRef> {}
+export type RefDef = Def<'Ref', FhirRef>
 
 /**
  * @since 0.0.1
@@ -130,7 +130,7 @@ export const refDef: (a: FhirRef) => RefDef = (a) => ({ _tag: 'Ref', ...a, $ref:
 /**
  * @since 0.0.1
  */
-export interface EnumArrayItemDef extends Def<'EnumArrayItem', FhirEnumArrayItem> {}
+export type EnumArrayItemDef = Def<'EnumArrayItem', FhirEnumArrayItem>
 
 /**
  * @since 0.0.1
@@ -140,7 +140,7 @@ export const enumArrayItemDef: (a: FhirEnumArrayItem) => EnumArrayItemDef = (a) 
 /**
  * @since 0.0.1
  */
-export interface RefArrayItemDef extends Def<'RefArrayItem', FhirRefArrayItem> {}
+export type RefArrayItemDef = Def<'RefArrayItem', FhirRefArrayItem>
 
 /**
  * @since 0.0.1

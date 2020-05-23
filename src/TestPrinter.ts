@@ -1,17 +1,17 @@
 import * as A from 'fp-ts/lib/Array'
+import * as F from 'fp-ts/lib/Foldable'
 import * as M from 'fp-ts/lib/Monoid'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as path from 'path'
 import * as prettier from 'prettier'
 
-import { intercalate } from 'fp-ts/lib/Foldable'
-import { Module } from './module'
+import { Module } from './ModuleParser'
 
 const CRLF = '\n'
 
-const srcDir = 'src'
-const fixtureDir = 'fixtures'
-const generatedDir = 'generated'
+const SRC_DIR = 'src'
+const FIXTURE_DIR = 'fixtures'
+const GENERATED_DIR = 'generated'
 
 const prettierOptions: prettier.Options = {
   parser: 'typescript',
@@ -20,24 +20,24 @@ const prettierOptions: prettier.Options = {
   printWidth: 120
 }
 
-const intercalateCRLF = (strings: Array<string>) => intercalate(M.monoidString, A.array)(CRLF, strings)
+const intercalateCRLF = (strings: Array<string>) => F.intercalate(M.monoidString, A.array)(CRLF, strings)
 
 function format(content: string): string {
   return prettier.format(content, prettierOptions)
 }
 
-function importFixture(resource: string, fixture: string): string {
-  return `import * as ${resource} from './${path.join(fixtureDir, resource, fixture)}'`
+function printFixtureImport(resource: string, fixture: string): string {
+  return `import * as ${resource} from './${path.join(FIXTURE_DIR, resource, fixture)}'`
 }
 
 function printTypeImport(name: string): string {
-  return `import { ${name} } from '${path.join('..', srcDir, generatedDir, name)}'`
+  return `import { ${name} } from '${path.join('..', SRC_DIR, GENERATED_DIR, name)}'`
 }
 
 function printImports(name: string, resource: string, fixture: string): string {
   const importAssert = `import * as assert from 'assert'`
   const importEither = `import * as E from 'fp-ts/lib/Either'`
-  return intercalateCRLF([importAssert, importEither, printTypeImport(name), importFixture(resource, fixture)])
+  return intercalateCRLF([importAssert, importEither, printTypeImport(name), printFixtureImport(resource, fixture)])
 }
 
 function printDescribe(name: string, statements: string): string {

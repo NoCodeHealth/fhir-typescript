@@ -1,16 +1,15 @@
 import * as A from 'fp-ts/lib/Array'
 import * as Eq from 'fp-ts/lib/Eq'
+import * as F from 'fp-ts/lib/Foldable'
 import * as M from 'fp-ts/lib/Monoid'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as prettier from 'prettier'
 
-import { Module } from './module'
+import { Module } from './ModuleParser'
 
-const CLRF = '\n\n'
+const CRLF = '\n'
 
-const foldString = M.fold(M.monoidString)
-
-const foldArrayString = M.fold(M.monoidString)
+const intercalateCRLF = (strings: Array<string>) => F.intercalate(M.monoidString, A.array)(CRLF, strings)
 
 const prettierOptions: prettier.Options = {
   parser: 'typescript',
@@ -36,27 +35,23 @@ function format(content: string): string {
   )
 }
 
-function printImport(name: string): string {
-  return `import { ${name} } from './${name}'\n`
+function printDependencyImport(name: string): string {
+  return `import { ${name} } from './${name}'`
 }
 
 function printImports(names: Array<string>): string {
-  return pipe(names, A.map(printImport), foldArrayString)
+  return pipe(names, A.map(printDependencyImport), intercalateCRLF)
 }
 
 function printExports(names: Array<string>): string {
-  let e = `export {${CLRF}`
-  e += A.array.reduce(names, '', (b, a) => `${b} ${a},${CLRF}`)
-  e += '}'
-  return e
+  return intercalateCRLF(['export {', ...names, '}'])
 }
 
 /**
  * @since 0.0.1
  */
 export function printModule(module: Module): string {
-  const imports = foldString([`import * as t from 'io-ts'\n`, printImports(module.imports)])
-  return pipe(foldString([imports, CLRF, module.content]), format)
+  return intercalateCRLF([`import * as t from 'io-ts'`, printImports(module.imports), '', module.content])
 }
 
 /**
@@ -65,12 +60,9 @@ export function printModule(module: Module): string {
 export function printIndex(modules: Array<Module>): string {
   const imports = pipe(
     modules,
-    A.map((module) => module.imports),
-    A.flatten,
+    A.chain((module) => module.imports),
     A.uniq(Eq.eqString)
   )
 
-  const content = foldString([printImports(imports), printExports(imports)])
-
-  return pipe(content, format)
+  return pipe(intercalateCRLF([printImports(imports), printExports(imports)]), format)
 }

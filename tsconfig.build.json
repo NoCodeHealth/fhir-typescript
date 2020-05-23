@@ -3,5 +3,5 @@
   "compilerOptions": {
     "noEmit": false
   },
-  "include": ["./generated"]
+  "include": ["./src/generated"]
 }
