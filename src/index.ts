@@ -8,7 +8,6 @@ import * as fs from 'fs-extra'
 import * as rimraf from 'rimraf'
 
 import * as core from './core'
-import * as resources from './parser'
 
 const capabilities: core.Capabilities = {
   ...TE.taskEither,
@@ -18,8 +17,7 @@ const capabilities: core.Capabilities = {
   clean: (pattern) => TE.rightIO(() => rimraf.sync(pattern)),
   info: (message) => TE.rightIO(C.log(chalk.bold.magenta(message))),
   log: (message) => TE.rightIO(C.log(chalk.cyan(message))),
-  debug: (message) => TE.rightIO(C.log(chalk.gray(message))),
-  makeResources: (schema) => TE.rightIO(() => resources.make(schema))
+  debug: (message) => TE.rightIO(C.log(chalk.gray(message)))
 }
 
 const exit = (code: 0 | 1): IO.IO<void> => () => process.exit(code)

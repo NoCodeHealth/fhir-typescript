@@ -1,9 +1,16 @@
+import * as M from 'fp-ts/lib/Monoid'
 import * as R from 'fp-ts/lib/Record'
 import { absurd } from 'fp-ts/lib/function'
+import { pipe } from 'fp-ts/lib/pipeable'
 import * as t from 'io-ts-codegen'
 
-import { formatName, ArrayDef, ComplexDef, Definition, PrimitiveDef, PropertyDef, ResourceListDef } from './models'
+import { ArrayDef, ComplexDef, Definition, PrimitiveDef, PropertyDef, ResourceListDef } from './model'
+import { prefixFhir } from './module'
 import { checks } from './validation'
+
+const CLRF = '\n\n'
+
+const foldString = M.fold(M.monoidString)
 
 const getPrimitiveType: (d: PrimitiveDef) => t.TypeReference = (d) => {
   switch (d.type) {
@@ -22,7 +29,7 @@ const getPrimitiveType: (d: PrimitiveDef) => t.TypeReference = (d) => {
 }
 
 const primitiveCombinator: (definition: PrimitiveDef) => t.TypeReference = (def) =>
-  t.brandCombinator(getPrimitiveType(def), (a) => checks(a, def), formatName(def.type))
+  t.brandCombinator(getPrimitiveType(def), (a) => checks(a, def), prefixFhir(def.type))
 
 const arrayPropertyCombinator: (definition: ArrayDef) => t.TypeReference = (def) => {
   switch (def.items._tag) {
@@ -80,7 +87,7 @@ const resourceListCombinator: (definition: ResourceListDef) => t.TypeReference =
 /**
  * @since 0.0.1
  */
-export const toDefinitionType: (name: string, definition: Definition) => t.TypeDeclaration = (n, d) => {
+const toTypeDeclaration: (name: string, definition: Definition) => t.TypeDeclaration = (n, d) => {
   switch (d._tag) {
     case 'Complex':
       return t.typeDeclaration(
@@ -100,4 +107,15 @@ export const toDefinitionType: (name: string, definition: Definition) => t.TypeD
     default:
       return absurd<t.TypeDeclaration>((null as any) as never)
   }
+}
+
+function printTypeDeclaration(declaration: t.TypeDeclaration): string {
+  return foldString([t.printRuntime(declaration), CLRF, t.printStatic(declaration)])
+}
+
+/**
+ * @since 0.0.1
+ */
+export function typeDef(name: string, definition: Definition): string {
+  return pipe(toTypeDeclaration(name, definition), printTypeDeclaration)
 }

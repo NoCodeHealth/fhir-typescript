@@ -1,17 +1,15 @@
 import * as A from 'fp-ts/lib/Array'
 import * as E from 'fp-ts/lib/Either'
-import * as M from 'fp-ts/lib/Monoid'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as RTE from 'fp-ts/lib/ReaderTaskEither'
-import * as RA from 'fp-ts/lib/ReadonlyArray'
 import { constVoid } from 'fp-ts/lib/function'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { draw } from 'io-ts/lib/Tree'
 import * as path from 'path'
-import * as prettier from 'prettier'
 
 import { FhirSchema } from './decoder'
-import { Resource } from './parser'
+import { makeModules, Module } from './module'
+import { printIndex, printModule } from './print'
 
 /**
  * @since 0.0.1
@@ -40,14 +38,7 @@ export interface MonadLog {
 /**
  * @since 0.0.1
  */
-export interface MonadResourceProvider {
-  readonly makeResources: (schema: FhirSchema) => Eff<Array<Resource>>
-}
-
-/**
- * @since 0.0.1
- */
-export interface Capabilities extends MonadFileSystem, MonadLog, MonadResourceProvider {}
+export interface Capabilities extends MonadFileSystem, MonadLog {}
 
 /**
  * @since 0.0.1
@@ -109,58 +100,30 @@ function writeFiles(files: Array<File>): AppEff<void> {
   return pipe(A.array.traverse(RTE.readerTaskEither)(files, writeFile), RTE.map(constVoid))
 }
 
-function prettify(content: string): string {
-  return prettier.format(content, {
-    bracketSpacing: true,
-    printWidth: 120,
-    semi: false,
-    singleQuote: true,
-    trailingComma: 'none',
-    parser: 'typescript'
-  })
-}
-
-function format(content: string): string {
-  return pipe(content.replace(/\b(\d+):\s*null,{0,1}/g, `'$1': null,`).replace(/(0BSD):/, `'$1':`), prettify)
-}
-
-function makeIndexFile(resources: Array<Resource>): File {
-  const imports = A.snoc(
-    A.array.map(resources, ({ formattedName }) => `import { ${formattedName} } from './${formattedName}'\n`),
-    '\n'
-  )
-
-  const exports = `export { ${A.array.map(resources, ({ formattedName }) => `${formattedName}`)} }`
-
+function makeIndexFile(modules: Array<Module>): File {
   const filePath = path.join(outDir, `index.ts`)
-  const content = pipe(M.fold(M.monoidString)([...imports, exports]), format)
+  const content = printIndex(modules)
 
   return file(filePath, content, true)
 }
 
-function makeResourceFile(resource: Resource): AppEff<File> {
-  const localImports = pipe(
-    resource.references,
-    RA.map((r) => `import { ${r} } from './${r}'\n`)
-  )
-  const imports = RA.cons(`import * as t from 'io-ts'\n`, localImports)
-
-  const filePath = path.join(outDir, `${resource.formattedName}.ts`)
-  const content = pipe(M.fold(M.monoidString)([...imports, '\n\n', resource.typeDefs]), format)
+function makeModuleFile(module: Module): AppEff<File> {
+  const filePath = path.join(outDir, `${module.name}.ts`)
+  const content = printModule(module)
 
   return () => TE.right(file(filePath, content, true))
 }
 
-function makeResourceFiles(resources: Array<Resource>): AppEff<Array<File>> {
-  return A.array.traverse(RTE.readerTaskEither)(resources, makeResourceFile)
+function makeModuleFiles(modules: Array<Module>): AppEff<Array<File>> {
+  return A.array.traverse(RTE.readerTaskEither)(modules, makeModuleFile)
 }
 
-const outPattern = path.join(outDir, '**/*.ts')
+function writeModules(files: Array<File>): AppEff<void> {
+  const outPattern = path.join(outDir, '**/*.ts')
 
-function writeResourceFiles(files: Array<File>): AppEff<void> {
   const cleanOut: AppEff<void> = (C) =>
     pipe(
-      C.log(`Writing resource files...`),
+      C.log(`Writing modules...`),
       TE.chain(() => C.debug(`Cleaning up generated folder: deleting ${outPattern}...`)),
       TE.chain(() => C.clean(outPattern))
     )
@@ -184,21 +147,17 @@ const getSchema: AppEff<FhirSchema> = (C) =>
     )
   )
 
-function getResources(schema: FhirSchema): AppEff<Resource[]> {
-  return (C) => C.makeResources(schema)
-}
-
 /**
  * @since 0.0.1
  */
 export const main: AppEff<void> = pipe(
   getSchema,
-  RTE.chain(getResources),
-  RTE.chain((resources) =>
+  RTE.chain((schema) => RTE.rightIO(() => makeModules(schema))),
+  RTE.chain((modules) =>
     pipe(
-      makeResourceFiles(resources),
-      RTE.map((files) => A.cons(makeIndexFile(resources), files)),
-      RTE.chain(writeResourceFiles)
+      makeModuleFiles(modules),
+      RTE.map((files) => A.cons(makeIndexFile(modules), files)),
+      RTE.chain(writeModules)
     )
   )
 )

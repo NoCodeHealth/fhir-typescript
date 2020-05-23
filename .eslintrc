@@ -9,6 +9,7 @@
   "plugins": ["@typescript-eslint", "import"],
   "extends": ["airbnb-typescript/base", "prettier/@typescript-eslint", "plugin:prettier/recommended"],
   "rules": {
+    "import/no-cycle": "off",
     "import/prefer-default-export": "off",
     "no-nested-ternary": "off",
     "no-shadow": "off",

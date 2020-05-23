@@ -1,5 +1,4 @@
 import * as A from 'fp-ts/lib/Array'
-import * as O from 'fp-ts/lib/Option'
 import * as RA from 'fp-ts/lib/ReadonlyArray'
 import * as RR from 'fp-ts/lib/ReadonlyRecord'
 import { absurd, tuple, Refinement } from 'fp-ts/lib/function'
@@ -20,26 +19,9 @@ import {
   FhirRefArrayItem,
   FhirResourceList
 } from './decoder'
+import { parseRef } from './module'
 
 type Def<URI, T> = { readonly _tag: URI } & T
-
-export const upperFirst = (word: string): string => `${word.charAt(0).toUpperCase()}${word.slice(1)}`
-
-/**
- * @since 0.0.1
- */
-export const formatName: (identifier: string) => string = (i) => `Fhir${upperFirst(i)}`
-
-/**
- * @since 0.0.1
- */
-export const parseRef: (ref: string) => string = (r) =>
-  pipe(
-    r.split('/'),
-    RA.last,
-    O.map(formatName),
-    O.getOrElse(() => '')
-  )
 
 /**
  * @since 0.0.1
