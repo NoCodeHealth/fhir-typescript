@@ -13,6 +13,7 @@
     "plugin:prettier/recommended"
   ],
   "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
     "import/no-cycle": "off",
     "import/prefer-default-export": "off",
     "no-nested-ternary": "off",
